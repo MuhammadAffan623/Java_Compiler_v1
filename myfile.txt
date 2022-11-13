@@ -1,0 +1,30 @@
+class A {
+    int b ; 
+    def A(int e){
+        float ffvf;
+    }
+
+    public static  basic void def myFunc (){
+        int sdsdds;
+    } 
+
+}
+
+class B extends A {
+    int c;
+    def B(int r){
+        super(78) ;
+        this.c = r;
+    }
+}
+
+class main{
+    A a = new A(5);
+    public static def main (){
+        A a = new A(5);
+        B b = new B(4);
+        int res ;
+        res = a.b * b.c ;
+    }
+}
+
