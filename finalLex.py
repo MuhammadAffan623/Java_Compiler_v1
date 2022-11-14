@@ -5,8 +5,6 @@ import os.path
 from tkinter import FALSE
 
 # For Identifiers
-
-
 def identifier(txt):
     identifier = "(([A-Z]|[a-z]|_)+[0-9]*)+"
     result = re.match(identifier, txt)
@@ -67,13 +65,15 @@ def checker(txt, ln, txtcheck):
                 if (i > 0) & (dots[i - 1] == "."):
                     tokenlist.append(("dot", ".", ln))
                     dots[i - 1] = ""
-                tokenlist.append(("identifier", sep[i], ln))
+                if sep[i] in keywords:
+                    tokenlist.append((keywords[sep[i]], sep[i], ln))
+                else:
+                    tokenlist.append(("identifier", sep[i], ln))
                 sep[i] = ""
             elif i < cou:
                 if Integerss(sep[i]):
                     if floatt(sep[i] + "." + sep[i + 1]):
-                        tokenlist.append(
-                            ("floatConst", sep[i] + "." + sep[i + 1], ln))
+                        tokenlist.append(("floatConst", sep[i] + "." + sep[i + 1], ln))
                         dots[i] = ""
                         sep[i] = ""
                         sep[i + 1] = ""
@@ -83,8 +83,7 @@ def checker(txt, ln, txtcheck):
                         dots[i] = ""
             if i > 0:
                 if (floatt(sep[i - 1] + "." + sep[i])) & (dots[i - 1] == "."):
-                    tokenlist.append(
-                        ("floatConst", sep[i - 1] + "." + sep[i], ln))
+                    tokenlist.append(("floatConst", sep[i - 1] + "." + sep[i], ln))
                     dots[i - 1] = ""
                     sep[i] = ""
                     sep[i - 1] = ""
@@ -95,10 +94,10 @@ def checker(txt, ln, txtcheck):
                 else:
                     if i != 0:
                         if dots[i - 1] == ".":
-                            tokenlist.append(("dot", ".", ln))
+                            tokenlist.append((".", ".", ln))
                             dots[i - 1] = ""
                     tokenlist.append(("lexeme error", sep[i], ln))
-                    tokenlist.append(("dot", ".", ln))
+                    tokenlist.append((".", ".", ln))
                     dots[i] = ""
                     sep[i] = ""
             elif sep[i] != "":
@@ -107,16 +106,15 @@ def checker(txt, ln, txtcheck):
                     sep[i] = ""
                     if dots[i] == ".":
                         dots[i] = ""
-                        tokenlist.append(("dot", ".", ln))
+                        tokenlist.append((".", ".", ln))
                 elif i > 0:
                     if dots[i - 1] == ".":
                         dots[i - 1] = ""
-                        tokenlist.append(("dot", ".", ln))
+                        tokenlist.append((".", ".", ln))
                     tokenlist.append(("lexeme error", sep[i], ln))
                     sep[i] = ""
 
     elif txt in keywords:
-        print(txt)
         tokenlist.append((keywords[txt], txt, ln))
     elif stringg(txt):
         tmp = txt[1:-1]
@@ -192,13 +190,12 @@ keywords = {
     "return": "return",
     "enum": "enum",
     "void": "void",
-    # "main": "main",
     "extends": "extends",
     "implements": "implements",
     "interface": "interface",
     "default": "default",
-    # "this": "this",
-    # "super": "super",
+    "this": "this",
+    "super": "super",
     "not": "notOp",
     "and": "logicOp",
     "or": "logicOp",
@@ -219,7 +216,7 @@ keywords = {
     "static": "static",
     "try": "try",
     "catch": "catch",
-    "Exception": "Exception"
+    "Exception": "Exception",
 }
 wordbreakers = {
     ":": "colon",
@@ -239,11 +236,11 @@ operators = {
     "*": "MDM",
     "/": "MDM",
     "%": "MDM",
-    ">": "compare",
-    "<": "compare",
+    ">": "compareOp",
+    "<": "compareOp",
     "!": "notOp",
-    "&": "logicOp",
-    "|": "logicOp",
+    "&": "AND",
+    "|": "OR",
 }
 doubleoperators = {
     # && and || dekhna

@@ -24,6 +24,8 @@ from seFunction import (
     lookupAttributeForType,
     typeMISmatchError,
 )
+from inspect import currentframe, getframeinfo
+
 
 error = ""
 errorList = []
@@ -157,11 +159,16 @@ def NAMS():
 
 def TSD():
     global i, tokenType
-    if TS():
+    chk, tsss = TS()
+    if chk:
+        print("TSSSSSS true")
         if tokenType[i] == "dot":
             i = i + 1
             return True
         else:
+            print(tokenType[i], tokenValue[i])
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -186,6 +193,8 @@ def for_B():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif tokenType[i] == "incDec":
@@ -201,6 +210,8 @@ def for_B():
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -221,6 +232,8 @@ def for_B():
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -240,6 +253,8 @@ def FNB():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -257,6 +272,8 @@ def Ref2():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -287,6 +304,8 @@ def mStringConst():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -311,6 +330,8 @@ def TRAS():
                 return False, "null"
         else:
             print("idFALSE", errorList)
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False, "null"
     elif tokenType[i] == "identifier":
@@ -346,6 +367,8 @@ def D2DA():
                 i = i + 1
                 return True
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -361,19 +384,22 @@ def ADT(value):
         i = i + 1
         if tokenType[i] == "identifier":
             if value == "this":
-                print("##################### this match")
                 tup = lookupAttributeForType(tokenValue[i], currentClass)
+                print("##################### this match", tup)
             else:
                 print("##################### super match")
                 print("is super")
             i = i + 1
-            return True, tup
-            # if B():
-            #     return True
-            # else:
-            #     return False
+            # return True, tup
+            chekerr, typpo = B(tup)
+            if chekerr:
+                return True
+            else:
+                return False
         else:
             print("the adt false $$$$$$$$$$$$$$$$$$$")
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif tokenType[i] == "openroundbrace":
@@ -385,9 +411,13 @@ def ADT(value):
                     i = i + 1
                     return True
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -397,8 +427,8 @@ def ADT(value):
 
 
 def TS():
-    print("IN TS")
     global i, tokenType
+    print("IN TS", tokenType[i])
     if tokenType[i] in ["this"]:
         print(tokenType[i])
         i = i + 1
@@ -415,8 +445,9 @@ def TAssign_st():
     global i, tokenType
     chk, value = TS()
     if chk:
-        print("after ts")
-        if ADT(value):
+        print("after ts", value)
+        chker = ADT(value)
+        if chker:
             return True
         else:
             return False
@@ -438,6 +469,8 @@ def FNA():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -455,6 +488,8 @@ def Ref():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -470,6 +505,8 @@ def EExp():
                 i = i + 1
                 return True
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -485,11 +522,14 @@ def B(parent):
         print("IN EQUALS", tokenType[i])
         chk, typ = Exp()
         if chk:
-            print("IN EXPPPPP", tokenType[i])
+            kuchBhi = binTypeCompatible(parent, typ, "=")
+            print("IN EXPPPPP", tokenType[i], parent, typ, kuchBhi)
             if tokenType[i] == "terminator":
                 i = i + 1
-                return True
+                return True, kuchBhi
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -525,6 +565,8 @@ def B(parent):
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif tokenType[i] == "incDec":
@@ -532,6 +574,8 @@ def B(parent):
         if tokenType[i] == "terminator":
             return True
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif tokenType[i] == "openroundbrace":
@@ -545,6 +589,8 @@ def B(parent):
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -565,6 +611,8 @@ def B(parent):
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -606,6 +654,8 @@ def LAS(parent):
                 i = i + 1
                 return True
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -641,6 +691,8 @@ def LAS(parent):
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif tokenType[i] == "incDec":
@@ -650,6 +702,8 @@ def LAS(parent):
             return True
         else:
             print("NOT TERMMMMMMMMMMMMMM")
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif tokenType[i] == "identifier":
@@ -690,6 +744,8 @@ def LAS(parent):
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -710,6 +766,8 @@ def LAS(parent):
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -752,6 +810,8 @@ def VAS():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif tokenType[i] == "incDec":
@@ -790,20 +850,36 @@ def OBJR():
                                 i = i + 1
                                 return True
                             else:
+                                frameinfo = getframeinfo(currentframe())
+                                print(
+                                    "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                    frameinfo.lineno,
+                                )
                                 errorMesssage(i)
                                 return False
                         else:
+                            frameinfo = getframeinfo(currentframe())
+                            print(
+                                "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                frameinfo.lineno,
+                            )
                             errorMesssage(i)
                             return False
                     else:
                         return False
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif tokenType[i] == "terminator":
@@ -827,6 +903,8 @@ def Ref1():
                 return False
         else:
             errorMesssage(i)
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             return False
     else:
         return True
@@ -867,6 +945,8 @@ def MAS(parent):
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif tokenType[i] == "incDec":
@@ -884,6 +964,8 @@ def MAS(parent):
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -902,6 +984,8 @@ def MAS(parent):
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -990,6 +1074,8 @@ def AR(dt):
                 else:
                     return False, arryDimension
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False, arryDimension
         else:
@@ -1010,6 +1096,8 @@ def D2DB(dt):
                 i = i + 1
                 return True, arryDimension
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -1074,6 +1162,7 @@ def init1(dt):
     global i, tokenType
     if tokenType[i] == "equals":
         i = i + 1
+        print("AFTER DECL EQUALS", tokenType[i])
         chk, typ = initD(dt)
         if chk:
             return True, typ
@@ -1088,6 +1177,7 @@ def initD(dt):
     print("in initd@@@@@@@@@@@@@@@@22", dt, tokenType[i])
     chk, dts = TRAS()
     if chk:
+        print("check is tru")
         if init1(dts):
             return True
         else:
@@ -1118,6 +1208,8 @@ def initD(dt):
                 i = i + 1
                 return True
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -1142,20 +1234,35 @@ def while_st():
                                 i = i + 1
                                 return True
                             else:
+                                frameinfo = getframeinfo(currentframe())
+                                print(
+                                    "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                    frameinfo.lineno,
+                                )
                                 errorMesssage(i)
                                 return False
                         else:
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1188,27 +1295,50 @@ def for_st():
                                             print("for endeddddddd")
                                             return True
                                         else:
+                                            frameinfo = getframeinfo(currentframe())
+                                            print(
+                                                "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                                frameinfo.lineno,
+                                            )
                                             errorMesssage(i)
                                             return False
                                     else:
                                         return False
                                 else:
+                                    frameinfo = getframeinfo(currentframe())
+                                    print(
+                                        "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                        frameinfo.lineno,
+                                    )
                                     errorMesssage(i)
                                     return False
                             else:
+                                frameinfo = getframeinfo(currentframe())
+                                print(
+                                    "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                    frameinfo.lineno,
+                                )
                                 errorMesssage(i)
                                 return False
                         else:
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1259,6 +1389,8 @@ def for_assign():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1277,6 +1409,8 @@ def inc_dec():
             i = i + 1
             return True, dt
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1299,20 +1433,35 @@ def switch_st():
                                 i = i + 1
                                 return True
                             else:
+                                frameinfo = getframeinfo(currentframe())
+                                print(
+                                    "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                    frameinfo.lineno,
+                                )
                                 errorMesssage(i)
                                 return False
                         else:
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1348,11 +1497,15 @@ def switch_B():
                     else:
                         return False
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1375,9 +1528,13 @@ def condition():
                 i = i + 1
                 return True
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
 
@@ -1387,6 +1544,8 @@ def condition():
             i = i + 1
             return True
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1411,11 +1570,17 @@ def if_else_elif():
                         else:
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -1439,11 +1604,17 @@ def elif_st():
                         else:
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -1465,14 +1636,22 @@ def else_st():
                         i = i + 1
                         return True
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1487,6 +1666,8 @@ def break_st():
             i = i + 1
             return True
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1577,11 +1758,15 @@ def try_catch_st():
                     else:
                         return False
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1610,20 +1795,38 @@ def OTC():
                                     else:
                                         return False
                                 else:
+                                    frameinfo = getframeinfo(currentframe())
+                                    print(
+                                        "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                        frameinfo.lineno,
+                                    )
                                     errorMesssage(i)
                                     return False
                             else:
                                 return False
                         else:
+                            frameinfo = getframeinfo(currentframe())
+                            print(
+                                "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                frameinfo.lineno,
+                            )
                             errorMesssage(i)
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -1644,11 +1847,15 @@ def OTF():
                 if tokenType[i] == "closecurlybrace":
                     i = i + 1
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1665,11 +1872,15 @@ def OTFD():
                 if tokenType[i] == "closecurlybrace":
                     i = i + 1
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -1691,7 +1902,7 @@ def Exp():
 
 def ExpD(leftType):
     global i, tokenType
-    if tokenType[i] == "LogicOp":
+    if tokenType[i] == "OR":
         op = tokenValue[i]
         i = i + 1
         chk, rightType = ANDOP()
@@ -1732,7 +1943,7 @@ def ANDOP():
 
 def ANDOPD(leftType):
     global i, tokenType
-    if tokenType[i] == "LogicOp":
+    if tokenType[i] == "AND":
         op = tokenValue[i]
         i = i + 1
         chk, rightType = ROPOP()
@@ -1775,7 +1986,7 @@ def ROPOPD(leftType):
     global i, tokenType
     print("in ropopd", tokenType[i])
     # need to be check
-    if tokenType[i] in ["compareOp", "compare"]:
+    if tokenType[i] == "compareOp":
         op = tokenValue[i]
         i = i + 1
         chk, rightType = E()
@@ -1892,6 +2103,8 @@ def F():
                 # will return function rdt
                 return True
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -1923,6 +2136,8 @@ def F():
                 # will return array dt
                 return True
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -1957,23 +2172,43 @@ def int_var():
                                     i = i + 1
                                     return True
                                 else:
+                                    frameinfo = getframeinfo(currentframe())
+                                    print(
+                                        "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                        frameinfo.lineno,
+                                    )
                                     errorMesssage(i)
                                     return False
                             else:
                                 return False
                         else:
+                            frameinfo = getframeinfo(currentframe())
+                            print(
+                                "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                frameinfo.lineno,
+                            )
                             errorMesssage(i)
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2010,6 +2245,8 @@ def idDash():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2028,6 +2265,8 @@ def int_INH():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2087,6 +2326,10 @@ def enum_def():
                     else:
                         if not success:
                             print("attribute not inrted")
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
@@ -2094,9 +2337,13 @@ def enum_def():
             else:
                 if notExist == False:
                     errorList.append(redeclarationError(currentClass))
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2116,6 +2363,8 @@ def imp():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2132,6 +2381,8 @@ def INH():
             if imp():
                 return True
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     elif imp():
@@ -2150,6 +2401,8 @@ def AN(dataTy):
             cons = dataTy + "[]"
             return True, cons
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2201,6 +2454,8 @@ def Dec():
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2218,6 +2473,8 @@ def obj():
             i = i + 1
             return True
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2300,6 +2557,11 @@ def func_def():
                                             print("close curly truuu", tokenType[i])
                                             return True
                                         else:
+                                            frameinfo = getframeinfo(currentframe())
+                                            print(
+                                                "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                                frameinfo.lineno,
+                                            )
                                             errorMesssage(i)
                                             return False
                                     else:
@@ -2310,25 +2572,45 @@ def func_def():
                                             redeclarationError(currentClass)
                                         )
                                         return False
+                                    frameinfo = getframeinfo(currentframe())
+                                    print(
+                                        "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                        frameinfo.lineno,
+                                    )
                                     errorMesssage(i)
                                     return False
                             else:
+                                frameinfo = getframeinfo(currentframe())
+                                print(
+                                    "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                    frameinfo.lineno,
+                                )
                                 errorMesssage(i)
                                 return False
                         else:
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
             if check == False:
                 print("type error")
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2342,6 +2624,8 @@ def construct_def():
         if tokenType[i] == "identifier":
             if tokenValue[i] != currentClass:
                 print("constructor syntax error")
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
             i = i + 1
@@ -2367,6 +2651,7 @@ def construct_def():
                         i = i + 1
                         if tokenType[i] == "opencurlybrace" and chk == True:
                             i = i + 1
+                            print("elseeeeeeeeeeeeee", tokenType[i])
                             if MST():
                                 if tokenType[i] == "closecurlybrace":
                                     value = destroyScope()
@@ -2374,6 +2659,12 @@ def construct_def():
                                     i = i + 1
                                     return True
                                 else:
+                                    print("elseeeeeeeeeeeeee", tokenType[i])
+                                    frameinfo = getframeinfo(currentframe())
+                                    print(
+                                        "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                        frameinfo.lineno,
+                                    )
                                     errorMesssage(i)
                                     return False
                             else:
@@ -2382,17 +2673,30 @@ def construct_def():
                             if chk == False:
                                 errorList.append(redeclarationError(currentClass))
                                 return False
+                            frameinfo = getframeinfo(currentframe())
+                            print(
+                                "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                frameinfo.lineno,
+                            )
                             errorMesssage(i)
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2592,6 +2896,11 @@ def class_def():
                                 i = i + 1
                                 return True
                             else:
+                                frameinfo = getframeinfo(currentframe())
+                                print(
+                                    "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                    frameinfo.lineno,
+                                )
                                 errorMesssage(i)
                                 return False
                         else:
@@ -2600,11 +2909,17 @@ def class_def():
                         if notExist == False:
                             theERROR = redeclarationError(currentClass)
                             errorList.append(theERROR)
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
@@ -2643,6 +2958,11 @@ def interface_def():
                             i = i + 1
                             return True
                         else:
+                            frameinfo = getframeinfo(currentframe())
+                            print(
+                                "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                frameinfo.lineno,
+                            )
                             errorMesssage(i)
                             return False
                     else:
@@ -2651,11 +2971,15 @@ def interface_def():
                     if notExist == False:
                         theERROR = redeclarationError(currentClass)
                         errorList.append(theERROR)
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2681,23 +3005,43 @@ def abs_func_def():
                                     i = i + 1
                                     return True
                                 else:
+                                    frameinfo = getframeinfo(currentframe())
+                                    print(
+                                        "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                        frameinfo.lineno,
+                                    )
                                     errorMesssage(i)
                                     return False
                             else:
+                                frameinfo = getframeinfo(currentframe())
+                                print(
+                                    "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                    frameinfo.lineno,
+                                )
                                 errorMesssage(i)
                                 return False
                         else:
                             return False
                     else:
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                     errorMesssage(i)
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
@@ -2817,7 +3161,11 @@ def abs_class_def():
                                 i = i + 1
                                 return True
                             else:
-
+                                frameinfo = getframeinfo(currentframe())
+                                print(
+                                    "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                    frameinfo.lineno,
+                                )
                                 errorMesssage(i)
                                 return False
                         else:
@@ -2830,14 +3178,22 @@ def abs_class_def():
                             else:
                                 theERROR = redeclarationError(currentClass)
                                 errorList.append(theERROR)
+                        frameinfo = getframeinfo(currentframe())
+                        print(
+                            "ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno
+                        )
                         errorMesssage(i)
                         return False
                 else:
                     return False
             else:
+                frameinfo = getframeinfo(currentframe())
+                print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
                 errorMesssage(i)
                 return False
         else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
             errorMesssage(i)
             return False
     else:
