@@ -44,7 +44,7 @@ typeCompatibility = {
     "intbool/": "int",
     "intbool%": "int",
     "intbool=": "int",
-    "intbool==":  "bool",
+    "intbool==": "bool",
     "intbool!=": "bool",
     "intbool<=": "bool",
     "intbool<": "bool",
@@ -55,6 +55,7 @@ typeCompatibility = {
     "floatfloat*": "float",
     "floatfloat/": "float",
     "floatfloat=": "float",
+    "floatint=": "float",
     "floatfloat==": "bool",
     "floatfloat!=": "bool",
     "floatfloat<=": "bool",
@@ -85,7 +86,7 @@ typeCompatibility = {
     "floatbool>": "bool",
     "floatbool>=": "bool",
     "stringstring+": "string",
-    "stringstring=":  "string",
+    "stringstring=": "string",
     "stringstring==": "bool",
     "stringstring!=": "bool",
     "stringstring<=": "bool",
@@ -133,7 +134,7 @@ typeCompatibility = {
     "charfloat>": "bool",
     "charfloat>=": "bool",
     "charstring+": "string",
-    "charbool+":  "int",
+    "charbool+": "int",
     "charbool-": "int",
     "charbool*": "int",
     "charbool/": "int",
@@ -219,10 +220,10 @@ class mainTable:
         self.attrTable = []
 
     def getTypeMod(self):
-        return(self.typeMod)
+        return self.typeMod
 
     def getName(self):
-        return(self.name)
+        return self.name
 
 
 class attributeTable:
@@ -244,8 +245,8 @@ class functionTable:
 
 def lookupMainTable(name):
     x = next((j for j in mainTable_ if j.name == name), "")
-    print('what is x', x)
-    if (x == ""):
+    print("what is x", x)
+    if x == "":
         return False
     # print("\tLookUp Main Table")
     # print(vars(x))
@@ -255,7 +256,7 @@ def lookupMainTable(name):
 def insertenumconst(val, enumlist):
     for i in mainTable_:
         fname = i.getName()
-        if(fname == val):
+        if fname == val:
             i.attrTable = enumlist
             return True
     return False
@@ -263,17 +264,17 @@ def insertenumconst(val, enumlist):
 
 def insertMainTable(name, Type, typeMod, extends, implements):
 
-    if (lookupMainTable(name) == False):
-        if(extends != "" and lookupMainTable(extends) == False):
-            print('------------cannot extends---------')
+    if lookupMainTable(name) == False:
+        if extends != "" and lookupMainTable(extends) == False:
+            print("------------cannot extends---------")
             return False, extends
-        elif(extends != ""):
+        elif extends != "":
             for i in mainTable_:
                 fname = i.getName()
                 ftype = i.getTypeMod()
-                if(fname == extends) and (ftype == "final"):
-                    extends = ''
-                    print('------------cannot extends bcz final---------')
+                if (fname == extends) and (ftype == "final"):
+                    extends = ""
+                    print("------------cannot extends bcz final---------")
                     return False, extends
 
         obj = mainTable(name, Type, typeMod, extends, implements)
@@ -287,38 +288,48 @@ def insertMainTable(name, Type, typeMod, extends, implements):
 
 def lookupAttributeTable(name, paramList, ofName):
     x = lookupMainTable(ofName)
-    if (x != False):
-        # y = next((j for j in x.attrTable if j.name ==
-        #           name and j.type == paramList), "")
-        # print("vale of Y", y)
-        # if (y == ""):
-        #     return False
-        # else:
-        #     return True
-        if ("->" not in paramList):
+    if x != False:
+        if "->" not in paramList:
             y = next((j for j in x.attrTable if j.name == name), "")
-            if (y == ""):
+            if y == "":
                 return False
             # print("\tLookUp Attr Table")
             # print(vars(y))
-            return y
+            c = y.type
+            print("[[[[[[[[[[[[[[[[[[[[[0", c)
+
+            return c
         else:
-            y = next((j for j in x.attrTable if j.name ==
-                     name and j.type == paramList), "")
-            if (y == ""):
+            y = next(
+                (j for j in x.attrTable if j.name == name and j.type == paramList), ""
+            )
+            if y == "":
                 return False
             # print("\tLookUp Attr Table")
             # print(vars(y))
-            return y
+            c = y.type
+            print("[[[[[[[[[[[[[[[[[[[[[0", c)
+            return c
+            # return y
     return False
 
 
-def insertAttribute(name,  Type, accessMod, static, abstract, final, ofName):
-    if(lookupAttributeTable(name, Type, ofName) == False):
+def lookupAttributeForType(name, ofName):
+    x = lookupMainTable(ofName)
+    y = next((j for j in x.attrTable if j.name == name), "")
+    if y == "":
+        return False
+    elif "->" not in y.type:
+        return y.type
+    else:
+        return False
+
+
+def insertAttribute(name, Type, accessMod, static, abstract, final, ofName):
+    if lookupAttributeTable(name, Type, ofName) == False:
         for i in mainTable_:
             if i.name == ofName:
-                obj = attributeTable(
-                    name,  Type, accessMod, static, abstract, final)
+                obj = attributeTable(name, Type, accessMod, static, abstract, final)
                 i.attrTable.append(obj)
                 # print("\tAttr Table")
                 # for t in i.attrTable:
@@ -329,9 +340,8 @@ def insertAttribute(name,  Type, accessMod, static, abstract, final, ofName):
 
 def lookupFunctionTable(name):
     for i in scopeStack_:
-        x = next((j for j in functionTable_ if j.scope ==
-                 i and j.name == name), "")
-        if (x != ""):
+        x = next((j for j in functionTable_ if j.scope == i and j.name == name), "")
+        if x != "":
             # print("\tLookUp Func Table")
             # print(vars(x))
             return x.type
@@ -339,7 +349,7 @@ def lookupFunctionTable(name):
 
 
 def insertFunctionTable(name, Type, scope):
-    if(lookupFunctionTable(name) == False):
+    if lookupFunctionTable(name) == False:
         obj = functionTable(name, Type, scope)
         functionTable_.append(obj)
         # print("\tFunction Table")
@@ -354,7 +364,7 @@ def createScope():
     highestScope += 1
     x = highestScope
     # print("createdScope:\t", x)
-    #scopeStack_.insert(0, x)
+    # scopeStack_.insert(0, x)
     scopeStack_.append(x)
     return scopeStack_[-1]
 
@@ -366,12 +376,14 @@ def destroyScope():
 
 
 def binTypeCompatible(left, right, op):
-    check = left + right + op
+    check = left.strip() + right.strip() + op.strip()
+    print("the check in cccc:", check)
     if check in typeCompatibility.keys():
         return typeCompatibility[check]
-    check = right + left + op
-    if check in typeCompatibility.keys():
-        return typeCompatibility[check]
+    # check = right.strip() + left.strip() + op.strip()
+    # print("the check in cccc:", check)
+    # if check in typeCompatibility.keys():
+    #     return typeCompatibility[check]
     return False
 
 
@@ -383,15 +395,37 @@ def uniTypeCompatible(left, op):
 
 
 def redeclarationError(sd):
-    sms = "!!!!!!!!!!  redeclaration error  : " + \
-        "\'" + sd + "\'" + " already exist !!!!!!!!!!!"
+    sms = (
+        "!!!!!!!!!!  redeclaration error  : "
+        + "'"
+        + sd
+        + "'"
+        + " already exist !!!!!!!!!!!"
+    )
     return sms
+
 
 def declarationError(sd):
-    sms = "!!!!!!!!!!  Declaration error  : " + \
-        "\'" + sd + "\'" + " does not  exist !!!!!!!!!!!"
+    sms = (
+        "!!!!!!!!!!  Declaration error  : "
+        + "'"
+        + sd
+        + "'"
+        + " does not  exist !!!!!!!!!!!"
+    )
     return sms
 
 
-def syntaxError(name):
-    return 'as'
+def ptypeError(parent):
+    sms = "primitive type Error at " + parent
+    return sms
+
+
+def scopeError(parent):
+    sms = "not access able in currrent scope" + parent
+    return sms
+
+
+def typeMISmatchError(left, right):
+    sms = "TYPE MISMATCH ERROR OF   " + left + " AND   " + right
+    return sms

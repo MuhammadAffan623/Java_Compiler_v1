@@ -1,5 +1,29 @@
 # from LexicalNew import tokenlist
-from seFunction import declarationError, highestScope, insertenumconst, createScope, destroyScope, insertAttribute, insertFunctionTable, insertMainTable, lookupAttributeTable, lookupFunctionTable, lookupMainTable, scopeStack_, binTypeCompatible, uniTypeCompatible, mainTable_, functionTable_, redeclarationError, createScope, destroyScope
+from seFunction import (
+    scopeError,
+    ptypeError,
+    declarationError,
+    highestScope,
+    insertenumconst,
+    createScope,
+    destroyScope,
+    insertAttribute,
+    insertFunctionTable,
+    insertMainTable,
+    lookupAttributeTable,
+    lookupFunctionTable,
+    lookupMainTable,
+    scopeStack_,
+    binTypeCompatible,
+    uniTypeCompatible,
+    mainTable_,
+    functionTable_,
+    redeclarationError,
+    createScope,
+    destroyScope,
+    lookupAttributeForType,
+    typeMISmatchError,
+)
 
 error = ""
 errorList = []
@@ -47,12 +71,21 @@ def calclateLineNo(itr):
 
 
 def errorMesssage(itr):
-    errorString = 'invalid syntax at line :', calclateLineNo(
-        itr), 'the token : ', allLines[itr], "after ", allLines[itr+1], "before r ", allLines[itr-1]
+    errorString = (
+        "invalid syntax at line :",
+        calclateLineNo(itr),
+        "the token : ",
+        allLines[itr]
+        # "after ",
+        # allLines[itr + 1],
+        # "before r ",
+        # allLines[itr - 1],
+    )
     errorList.append(errorString)
 
-
     # print('invalid syntax at line :' , calclateLineNo(itr) , 'the token : ', allLines[itr])
+
+
 # --------------------
 resultFile = open("result.txt")
 
@@ -63,15 +96,15 @@ tokenLine = []
 
 for line in allLines:
     splitted = line.split(",")
-    if(len(splitted) > 2):
+    if len(splitted) > 2:
         tokenType.append(splitted[0])
         tokenValue.append(splitted[1])
 
 tokenType.append("EOF")
 tokenValue.append("EOF")
-print('<<<<<<<<<<<<<<<<<<<<<<<<<EXTRAS START>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+print("<<<<<<<<<<<<<<<<<<<<<<<<<EXTRAS START>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 print(tokenType)
-print('<<<<<<<<<<<<<<<<<<<<<<<<<EXTRAS END>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+print("<<<<<<<<<<<<<<<<<<<<<<<<<EXTRAS END>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
 
 def MVA():
@@ -132,6 +165,7 @@ def TSD():
             errorMesssage(i)
             return False
     else:
+        print("tsd false")
         return False
 
 
@@ -175,7 +209,7 @@ def for_B():
         i = i + 1
         if Exp():
             if tokenType[i] == "closesquarebrace":
-                i = i+1
+                i = i + 1
                 if D2DA():
                     if Ref2():
                         if ETExp():
@@ -260,7 +294,7 @@ def mStringConst():
 
 
 def TRAS():
-    global i, tokenType
+    global i, tokenType, currentClass
     print("IN TRASSSSSSS 3333333333", tokenType[i])
     if TSD():
         print("TSD TRUEEEEEEEEEE", errorList)
@@ -269,24 +303,38 @@ def TRAS():
             first = tokenValue[i]
             print("IN TRASSSSSSSSSSSSSSS")
             i = i + 1
-            if MAS(first):
-                return True
+            chk, tyoe = MAS(first)
+            print("MAS AER", tyoe, first)
+            if chk:
+                return True, tyoe
             else:
-                return False
+                return False, "null"
         else:
             print("idFALSE", errorList)
             errorMesssage(i)
-            return False
+            return False, "null"
     elif tokenType[i] == "identifier":
+
         first = tokenValue[i]
         print("IN TRASSSSSSSSSSSSSSS")
         i = i + 1
-        if MAS(first):
-            return True
+        chk, tyoe = MAS(first)
+        # if tyoe not in []:
+        print("MAS AER", tyoe)
+        # chkss = lookupFunctionTable(tyoe)
+        # print("chks after function table___________", chkss)
+        # if chkss == False:
+        #     chkss = lookupAttributeForType(first, currentClass)
+        # print(" in trasssssssss 00000000000000000", tyoe, chkss)
+        if chk:
+            # if check:
+            return True, tyoe
         else:
-            return False
+            # errorList.append(declarationError(first))
+            return False, "null"
     else:
-        return False
+        print("tras false")
+        return False, "null"
 
 
 def D2DA():
@@ -306,17 +354,26 @@ def D2DA():
         return True
 
 
-def ADT():
-    global i, tokenType
+def ADT(value):
+    global i, tokenType, currentClass
+    print("in ADT ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,", value, ";")
     if tokenType[i] == "dot":
         i = i + 1
         if tokenType[i] == "identifier":
-            i = i + 1
-            if B():
-                return True
+            if value == "this":
+                print("##################### this match")
+                tup = lookupAttributeForType(tokenValue[i], currentClass)
             else:
-                return False
+                print("##################### super match")
+                print("is super")
+            i = i + 1
+            return True, tup
+            # if B():
+            #     return True
+            # else:
+            #     return False
         else:
+            print("the adt false $$$$$$$$$$$$$$$$$$$")
             errorMesssage(i)
             return False
     elif tokenType[i] == "openroundbrace":
@@ -340,23 +397,26 @@ def ADT():
 
 
 def TS():
+    print("IN TS")
     global i, tokenType
-    if (tokenType[i] in ['this']):
+    if tokenType[i] in ["this"]:
         print(tokenType[i])
         i = i + 1
-        return True
-    elif tokenType[i] in ['super']:
+        return True, "this"
+    elif tokenType[i] in ["super"]:
         i = i + 1
-        return True
+        return True, "super"
     else:
-        return False
+        print("ts false")
+        return False, ""
 
 
 def TAssign_st():
     global i, tokenType
-    if TS():
+    chk, value = TS()
+    if chk:
         print("after ts")
-        if ADT():
+        if ADT(value):
             return True
         else:
             return False
@@ -372,7 +432,7 @@ def FNA():
     elif tokenType[i] == "dot":
         i = i + 1
         if tokenType[i] == "identifier":
-            i = i+1
+            i = i + 1
             if B():
                 return True
             else:
@@ -389,7 +449,7 @@ def Ref():
     if tokenType[i] == "dot":
         i = i + 1
         if tokenType[i] == "identifier":
-            i = i+1
+            i = i + 1
             if B():
                 return True
             else:
@@ -418,15 +478,16 @@ def EExp():
         return False
 
 
-def B():
+def B(parent):
     global i, tokenType
     if tokenType[i] == "equals":
         i = i + 1
         print("IN EQUALS", tokenType[i])
-        if Exp():
+        chk, typ = Exp()
+        if chk:
             print("IN EXPPPPP", tokenType[i])
             if tokenType[i] == "terminator":
-                i = i+1
+                i = i + 1
                 return True
             else:
                 errorMesssage(i)
@@ -435,10 +496,32 @@ def B():
             return False
     elif tokenType[i] == "dot":
         i = i + 1
+        chkORtype = lookupFunctionTable(parent)
+        print("&&&&&&&&&&&&&&&&&&&&&&&dot true : parent in mas ", parent, chkORtype)
+        if chkORtype == False:
+
+            print("not access able in currrent scope")
+            errorList.append(scopeError(parent))
+            return False
+        if chkORtype in [
+            "int",
+            "string",
+            "char",
+            "bool",
+            "float",
+        ]:
+
+            errorList.append(ptypeError(parent))
+            print("cannot refer premittive type")
+            return False
         if tokenType[i] == "identifier":
+
+            chker = lookupAttributeTable(tokenValue[i], "~", chkORtype)
             i = i + 1
-            if B():
-                return True
+            chk, tyoe = B(chker)
+            if chk:
+                print("inBBBBBBBBBBB ")
+                return True, tyoe
             else:
                 return False
         else:
@@ -470,7 +553,7 @@ def B():
         i = i + 1
         if Exp():
             if tokenType[i] == "closesquarebrace":
-                i = i+1
+                i = i + 1
                 if D2DA():
                     if Ref():
                         if EExp():
@@ -493,13 +576,34 @@ def B():
 def LAS(parent):
     global i, tokenType, highestScope, accessMODvalue, isStatic, isAbstract, isFinal, currentClass
     if tokenType[i] == "equals":
+        leftType = lookupFunctionTable(parent)
+        print("tttttttttttttttttttttttttttttttttttttttttttttttttt", leftType)
+        if leftType == False:
+            print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy", parent)
+            typess = lookupAttributeForType(parent, currentClass)
+            print("[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]gggggg", typess)
+            leftType = typess
 
+        op = "="
+        print("+++++++++++++++type of parent", parent)
         i = i + 1
-        print('going in exp', tokenType[i])
-        if Exp():
-            print('after exp in las', tokenType[i])
+        print("going in exp", tokenType[i])
+        check, rightType = Exp()
+
+        print("+++++++++++++++type of Expt", rightType)
+        if check:
+            print(leftType, rightType, op)
+            theType = binTypeCompatible(leftType, rightType, op)
+            print(" ------------------------ Type after EQUALS -------------", theType)
+            if theType != False:
+                typ = theType
+            else:
+                errorList.append(typeMISmatchError(leftType, rightType))
+                print("type mis match-=============---------=+++++++++++++++++++")
+
+            print("after exp in las", tokenType[i])
             if tokenType[i] == "terminator":
-                i = i+1
+                i = i + 1
                 return True
             else:
                 errorMesssage(i)
@@ -509,13 +613,31 @@ def LAS(parent):
     elif tokenType[i] == "dot":
         i = i + 1
         print("dot trueeeee")
+        chkORtype = lookupFunctionTable(parent)
+        print("&&&&&&&&&&&&&&&&&&&&&&&dot true : parent in mas ", parent, chkORtype)
+        if chkORtype == False:
+            print("not access able in currrent scope")
+            errorList.append(scopeError(parent))
+            return False
+        if chkORtype in [
+            "intConst",
+            "stringConst",
+            "charConst",
+            "boolConst",
+            "floatConst",
+        ]:
+
+            errorList.append(ptypeError(parent))
+            print("cannot refer premittive type")
+            return False
         if tokenType[i] == "identifier":
 
+            chker = lookupAttributeTable(tokenValue[i], "~", chkORtype)
             i = i + 1
-            print("ID GAINNNNNNNN", tokenType[i])
-            if B():
+            chk, tyoe = B(chker)
+            if chk:
                 print("inBBBBBBBBBBB ")
-                return True
+                return True, tyoe
             else:
                 return False
         else:
@@ -532,21 +654,28 @@ def LAS(parent):
             return False
     elif tokenType[i] == "identifier":
         iDforType = tokenValue[i]
-        if(isFunc):
+        if isFunc:
             check2 = lookupMainTable(parent)
             check = insertFunctionTable(iDforType, parent, highestScope)
         else:
             check2 = lookupMainTable(parent)
             check = insertAttribute(
-                iDforType,  parent, accessMODvalue, isStatic, isAbstract, isFinal, currentClass)
+                iDforType,
+                parent,
+                accessMODvalue,
+                isStatic,
+                isAbstract,
+                isFinal,
+                currentClass,
+            )
         i = i + 1
         if OBJR() and check and check2:
             return True
         else:
-            if(check2 == False):
+            if check2 == False:
                 errorList.append(declarationError(parent))
                 return False
-            if(check == False):
+            if check == False:
                 errorList.append(redeclarationError(iDforType))
                 return False
             return False
@@ -569,7 +698,7 @@ def LAS(parent):
         i = i + 1
         if Exp():
             if tokenType[i] == "closesquarebrace":
-                i = i+1
+                i = i + 1
                 if D2DA():
                     if Ref():
                         if EExp():
@@ -691,8 +820,9 @@ def Ref1():
         if tokenType[i] == "identifier":
             first = tokenValue[i]
             i = i + 1
-            if MAS(first):
-                return True
+            chk, tyoe = MAS(first)
+            if chk:
+                return True, tyoe
             else:
                 return False
         else:
@@ -705,28 +835,35 @@ def Ref1():
 def MAS(parent):
     global i, tokenType, currentClass
     searchIn = parent
+    theType = ""
     print("IN MAS", tokenType[i])
     if tokenType[i] == "dot":
-        if(searchIn != ""):
-            print('lookup')
-        # print("dot true : parent in mas ", parent)
-        # chk = lookupFunctionTable(parent)
-        # print('chk in MAS', chk)
-        # if(chk == False):
-        #     print('not access able in currrent scope')
-        #     return False
-        # if(chk in ["intConst", "stringConst", "charConst", "boolConst", "floatConst"]):
-        #     print('cannot refer premittive type')
-        #     return False
-        # searchIn = chk
-        # print('the first parent ,', chk)
+        if searchIn != "":
+            print("lookup")
+        chkORtype = lookupFunctionTable(parent)
+        print("&&&&&&&&&&&&&&&&&&&&&&&dot true : parent in mas ", parent, chkORtype)
+        if chkORtype == False:
+            print("not access able in currrent scope")
+            errorList.append(scopeError(parent))
+            return False
+        if chkORtype in [
+            "intConst",
+            "stringConst",
+            "charConst",
+            "boolConst",
+            "floatConst",
+        ]:
+
+            errorList.append(ptypeError(parent))
+            print("cannot refer premittive type")
+            return False
         i = i + 1
         if tokenType[i] == "identifier":
-            first = tokenValue[i]
-            lookupAttributeTable(tokenValue[i], "~", searchIn)
+            chker = lookupAttributeTable(tokenValue[i], "~", chkORtype)
             i = i + 1
-            if MAS(first):
-                return True
+            chk, tyoe = MAS(chker)
+            if chk:
+                return True, tyoe
             else:
                 return False
         else:
@@ -755,7 +892,7 @@ def MAS(parent):
         i = i + 1
         if Exp():
             if tokenType[i] == "closesquarebrace":
-                i = i+1
+                i = i + 1
                 if D2DA():
                     if Ref1():
                         print("ras true")
@@ -770,7 +907,9 @@ def MAS(parent):
         else:
             return False
     else:
-        return True
+        # if(theType != ""):
+        #     return True , theType
+        return True, parent
 
 
 def Decl():
@@ -780,25 +919,43 @@ def Decl():
         i = i + 1
         if tokenType[i] == "identifier":
             mainID = tokenValue[i]
-            i = i+1
+            i = i + 1
+
             check, arrDimen = AR(dt)
+            print("akter ar 000000000000000000")
             if check:
-                if(arrDimen != ""):
+                if arrDimen != "":
                     dt = arrDimen
-                print("oppppppppppppppppppp", dt,
-                      mainID, arrDimen, accessMODvalue, isStatic, isFinal, isAbstract, currentClass)
-                if(isFunc == False):
+                print(
+                    "oppppppppppppppppppp",
+                    dt,
+                    mainID,
+                    arrDimen,
+                    accessMODvalue,
+                    isStatic,
+                    isFinal,
+                    isAbstract,
+                    currentClass,
+                )
+                if isFunc == False:
                     isInserted = insertAttribute(
-                        mainID,  dt, accessMODvalue, isStatic, isAbstract, isFinal, currentClass)
+                        mainID,
+                        dt,
+                        accessMODvalue,
+                        isStatic,
+                        isAbstract,
+                        isFinal,
+                        currentClass,
+                    )
                 else:
                     isInserted = insertFunctionTable(mainID, dt, highestScope)
-                if init1() and isInserted:
+                if init1(dt) and isInserted:
                     if list1(dt):
                         return True
                     else:
                         return False
                 else:
-                    if (isInserted == False):
+                    if isInserted == False:
                         sms = redeclarationError(mainID)
                         errorList.append(sms)
                     return False
@@ -813,12 +970,17 @@ def Decl():
 
 def AR(dt):
     global i, tokenType
-    arryDimension = ''
+    arryDimension = ""
+    print("IN AR4RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
     if tokenType[i] == "opensquarebrace":
         i = i + 1
+        print("AFTER OSBBBBBBBBBBBBBBBBBBBBBBB")
         if ExpN():
+            print("EXPNNMNNNNNNNNNNNNNNNNNNNNNNNNNN")
             if tokenType[i] == "closesquarebrace":
-                arryDimension = '[ %s ]' % (dt)
+
+                arryDimension = "[ %s ]" % (dt)
+                print("the arr dimansion", arryDimension)
                 i = i + 1
                 check, arryDimension2 = D2DB(arryDimension)
                 if check:
@@ -838,13 +1000,13 @@ def AR(dt):
 
 def D2DB(dt):
     global i, tokenType
-    arryDimension = ''
+    arryDimension = ""
     if tokenType[i] == "opensquarebrace":
         i = i + 1
         if ExpN():
             if tokenType[i] == "closesquarebrace":
-                arryDimension = dt+dt
-                print('the assdfwdf arraydimension', arryDimension, dt)
+                arryDimension = dt + dt
+                print("the assdfwdf arraydimension", arryDimension, dt)
                 i = i + 1
                 return True, arryDimension
             else:
@@ -868,13 +1030,29 @@ def list1(dt):
             i = i + 1
             check, arrDimen = AR(dt)
             if check:
-                if(arrDimen != ""):
+                if arrDimen != "":
                     dt = arrDimen
-                print("oppppppppppppppppppp list mod", dt,
-                      theID, arrDimen, accessMODvalue, isStatic, isFinal, isAbstract, currentClass)
+                print(
+                    "oppppppppppppppppppp list mod",
+                    dt,
+                    theID,
+                    arrDimen,
+                    accessMODvalue,
+                    isStatic,
+                    isFinal,
+                    isAbstract,
+                    currentClass,
+                )
                 isInserted = insertAttribute(
-                    theID, dt, accessMODvalue, isStatic, isAbstract, isFinal, currentClass)
-                if init1() and isInserted:
+                    theID,
+                    dt,
+                    accessMODvalue,
+                    isStatic,
+                    isAbstract,
+                    isFinal,
+                    currentClass,
+                )
+                if init1(dt) and isInserted:
                     if list1(dt):
                         return True
                     else:
@@ -892,34 +1070,52 @@ def list1(dt):
         return False
 
 
-def init1():
+def init1(dt):
     global i, tokenType
     if tokenType[i] == "equals":
         i = i + 1
-        if initD():
-            return True
+        chk, typ = initD(dt)
+        if chk:
+            return True, typ
         else:
-            errorMesssage(i)
             return False
     else:
-        return True
+        return True, "null"
 
 
-def initD():
+def initD(dt):
     global i, tokenType
-    if TRAS():
-        if init1():
+    print("in initd@@@@@@@@@@@@@@@@22", dt, tokenType[i])
+    chk, dts = TRAS()
+    if chk:
+        if init1(dts):
             return True
         else:
             return False
-    elif tokenType[i] in ["intConst", "stringConst", "charConst", "boolConst", "floatConst"]:
-        i = i+1
-        return True
+    elif tokenType[i] in [
+        "intConst",
+        "stringConst",
+        "charConst",
+        "boolConst",
+        "floatConst",
+    ]:
+        rightType = tokenType[i].split("C")[0]
+        thessss = binTypeCompatible(dt, rightType, "=")
+        print(
+            "-----------------after dec ++++++++++++++++++++++++",
+            thessss,
+            dt,
+            rightType,
+        )
+        if thessss == False:
+            errorList.append(typeMISmatchError(dt, rightType))
+        i = i + 1
+        return True, thessss
     elif tokenType[i] == "opensquarebrace":
-        i = i+1
+        i = i + 1
         if Args():
             if tokenType[i] == "closesquarebrace":
-                i = i+1
+                i = i + 1
                 return True
             else:
                 errorMesssage(i)
@@ -1125,7 +1321,14 @@ def switch_st():
 
 def switch_in():
     global i, tokenType
-    if tokenType[i] in ["identifier", "intConst", "floatConst", "charConst", "stringConst", "boolConst"]:
+    if tokenType[i] in [
+        "identifier",
+        "intConst",
+        "floatConst",
+        "charConst",
+        "stringConst",
+        "boolConst",
+    ]:
         i = i + 1
         return True
     else:
@@ -1160,7 +1363,13 @@ def condition():
     global i, tokenType
     if tokenType[i] == "case":
         i = i + 1
-        if tokenType[i] in {"intConst", "floatConst", "charConst", "stringConst", "boolConst"}:
+        if tokenType[i] in {
+            "intConst",
+            "floatConst",
+            "charConst",
+            "stringConst",
+            "boolConst",
+        }:
             i = i + 1
             if tokenType[i] == "colon":
                 i = i + 1
@@ -1315,7 +1524,9 @@ def return_st():
 
 def ExpN():
     global i, tokenType
+    print("IN EXPNNNNNNNNNNNNNNNNNNNN")
     if Exp():
+        print("exp trueeeeeeeeeeeeeeeeeeeeeeee")
         return True
     else:
         return True
@@ -1467,138 +1678,209 @@ def OTFD():
 
 def Exp():
     global i, tokenType
-    if ANDOP():
-        print("in Andop")
-        if ExpD():
-            return True
+    chkk, typp = ANDOP()
+    if chkk:
+        chker, types = ExpD(typp)
+        if chker:
+            return True, types
         else:
-            return False
+            return False, "null"
     else:
-        return False
+        return False, "null"
 
 
-def ExpD():
+def ExpD(leftType):
     global i, tokenType
     if tokenType[i] == "LogicOp":
-        i = i+1
-        if ANDOP():
-            if ExpD():
-                return True
+        op = tokenValue[i]
+        i = i + 1
+        chk, rightType = ANDOP()
+        if chk:
+            print(leftType, rightType, op)
+            theType = binTypeCompatible(leftType, rightType, op)
+            print(
+                " ------------------------ Type after comparisio -------------", theType
+            )
+            if theType != False:
+                typ = theType
             else:
-                return False
+                print("type mis match-=============---------=+++++++++++++++++++")
+            chk, tope = ExpD(typ)
+            if chk and tope != False:
+                return True, tope
+            else:
+                return False, "null"
         else:
-            return False
+            return False, "null"
     else:
-        return True
+        return True, leftType
 
 
 def ANDOP():
+    print("IN ANDOP")
     global i, tokenType
-    if ROPOP():
-        if ANDOPD():
-            return True
+    chk, typ = ROPOP()
+    if chk:
+        chhk, tyyyp = ANDOPD(typ)
+        if chhk:
+            return True, tyyyp
         else:
-            return False
+            return False, "null"
     else:
-        return False
+        return False, "null"
 
 
-def ANDOPD():
+def ANDOPD(leftType):
     global i, tokenType
     if tokenType[i] == "LogicOp":
+        op = tokenValue[i]
         i = i + 1
-        if ROPOP():
-            if ANDOPD():
-                return True
+        chk, rightType = ROPOP()
+        if chk:
+            print(leftType, rightType, op)
+            theType = binTypeCompatible(leftType, rightType, op)
+            print(
+                " ------------------------ Type after comparisio -------------", theType
+            )
+            if theType != False:
+                typ = theType
             else:
-                return False
+                print("type mis match-=============---------=+++++++++++++++++++")
+            chk, tope = ANDOPD(typ)
+            if chk and tope != False:
+                return True, tope
+            else:
+                return False, "null"
         else:
-            return False
+            return False, "null"
     else:
-        return True
+        return True, leftType
 
 
 def ROPOP():
+    print("IN ROPOP")
     global i, tokenType
-    if E():
-        if ROPOPD():
-            return True
+    chkk, typp = E()
+    if chkk:
+        chker, types = ROPOPD(typp)
+        if chker:
+            return True, types
         else:
-            return False
+            return False, "null"
     else:
-        return False
+        return False, "null"
 
 
-def ROPOPD():
+def ROPOPD(leftType):
     global i, tokenType
     print("in ropopd", tokenType[i])
     # need to be check
     if tokenType[i] in ["compareOp", "compare"]:
+        op = tokenValue[i]
         i = i + 1
-        if E():
-            if ROPOPD():
-                return True
+        chk, rightType = E()
+        if chk:
+            print(leftType, rightType, op)
+            theType = binTypeCompatible(leftType, rightType, op)
+            print(
+                " ------------------------ Type after comparisio -------------", theType
+            )
+            if theType != False:
+                typ = theType
             else:
-                return False
+                print("type mis match-=============---------=+++++++++++++++++++")
+            chk, tope = ROPOPD(typ)
+            if chk and tope != False:
+                return True, tope
+            else:
+                return False, "null"
         else:
-            return False
+            return False, "null"
     else:
-        return True
+        return True, leftType
 
 
 def E():
+    print("IN E")
     global i, tokenType
-    if T():
-        if ED():
-            return True
+    chk, typ = T()
+    if chk:
+        chker, typd = ED(typ)
+        if chker:
+            return True, typd
         else:
-            return False
+            return False, "null"
     else:
-        return False
+        return False, "null"
 
 
-def ED():
+def ED(leftType):
     global i, tokenType
     if tokenType[i] == "PM":
+        op = tokenValue[i]
         i = i + 1
-        if T():
-            if ED():
-                return True
+        chk, rightType = T()
+        if chk:
+            print(leftType, rightType, op)
+            theType = binTypeCompatible(leftType, rightType, op)
+            print("-----------tyoe after comaoasdfsdf ------", theType)
+            typ = ""
+            if theType != False:
+                typ = theType
+            chsck, tope = ED(typ)
+            if chsck and tope != False:
+                return True, tope
             else:
-                return False
+                return False, "null"
         else:
-            return False
+            return False, "null"
     else:
-        return True
+        return True, leftType
 
 
 def T():
+    print("IN T")
     global i, tokenType
-    if F():
-        if TD():
-            return True
+    chk, typ = F()
+    if chk:
+        chhk, typew = TD(typ)
+        if chhk:
+            return True, typew
         else:
-            return False
+            return False, "null"
     else:
-        return False
+        return False, "null"
 
 
-def TD():
+def TD(leftType):
     global i, tokenType
     if tokenType[i] == "MDM":
+        op = tokenValue[i]
         i = i + 1
-        if F():
-            if TD():
-                return True
+        chk, rightType = F()
+        if chk:
+            print(leftType, rightType, op)
+            theType = binTypeCompatible(leftType, rightType, op)
+            print(
+                " ------------------------ Type after comparisio -------------", theType
+            )
+            if theType != False:
+                typ = theType
             else:
-                return False
+                print("type mis match-=============---------=+++++++++++++++++++")
+            ccchk, tope = TD(typ)
+            if ccchk and tope != False:
+                return True, tope
+            else:
+                return False, "null"
         else:
-            return False
+            return False, "null"
     else:
-        return True
+        return True, leftType
 
 
 def F():
+    print("IN F")
     global i, tokenType
     if tokenType[i] == "openroundbrace":
         i = i + 1
@@ -1614,12 +1896,18 @@ def F():
                 return False
         else:
             return False
-    elif tokenType[i] in {"intConst", "floatConst", "charConst", "stringConst", "boolConst"}:
-        dt = tokenType[i]
+    elif tokenType[i] in {
+        "intConst",
+        "floatConst",
+        "charConst",
+        "stringConst",
+        "boolConst",
+    }:
+        dt = tokenType[i].split("C")[0]
         i = i + 1
         return True, dt
     elif tokenType[i] == "notOp":
-        i = i+1
+        i = i + 1
         check, dtOut = F()
         if check:
             # f will return dt
@@ -1639,10 +1927,14 @@ def F():
                 return False
         else:
             return False
-    elif TRAS():
-        return True
     else:
-        return False
+        print("IN F TRAS")
+        chk, tpe = TRAS()
+        print("-----------000000000000000--------", chk)
+        if chk:
+            return True, tpe
+        else:
+            return False, ""
 
 
 def int_var():
@@ -1725,7 +2017,7 @@ def idDash():
 
 
 def int_INH():
-    global i, tokenType,  extendingClass
+    global i, tokenType, extendingClass
     if tokenType[i] == "extends":
         i = i + 1
         if tokenType[i] == "identifier":
@@ -1773,9 +2065,14 @@ def enum_def():
         if tokenType[i] == "identifier":
             currentClass = tokenValue[i]
             notExist = insertMainTable(
-                currentClass, mainTableType, mainTableTypeMOD, extendingClass, multipleInterface)
+                currentClass,
+                mainTableType,
+                mainTableTypeMOD,
+                extendingClass,
+                multipleInterface,
+            )
             print(notExist, "the result")
-            print('after insertion')
+            print("after insertion")
             i = i + 1
             if tokenType[i] == "opencurlybrace" and notExist:
                 i = i + 1
@@ -1783,13 +2080,13 @@ def enum_def():
                     print(enumlist)
                     success = insertenumconst(currentClass, enumlist)
                     if tokenType[i] == "closecurlybrace" and success:
-                        currentClass = ''
-                        mainTableType = ''
+                        currentClass = ""
+                        mainTableType = ""
                         i = i + 1
                         return True
                     else:
-                        if(not success):
-                            print('attribute not inrted')
+                        if not success:
+                            print("attribute not inrted")
                         errorMesssage(i)
                         return False
                 else:
@@ -1845,7 +2142,7 @@ def INH():
 
 def AN(dataTy):
     global i, tokenType
-    cons = ''
+    cons = ""
     if tokenType[i] == "opensquarebrace":
         i = i + 1
         if tokenType[i] == "closesquarebrace":
@@ -1861,9 +2158,9 @@ def AN(dataTy):
 
 def RDT():
     global i, tokenType
-    dt = ''
+    dt = ""
     if tokenType[i] == "void":
-        dt = 'void'
+        dt = "void"
         i = i + 1
         return True, dt
     elif tokenType[i] == "dataType":
@@ -1871,7 +2168,7 @@ def RDT():
         i = i + 1
         chker, rdddt = AN(dt)
         if chker:
-            if(rdddt != ""):
+            if rdddt != "":
                 dt = rdddt
             return True, dt
     elif tokenType[i] == "identifier":
@@ -1892,14 +2189,14 @@ def Dec():
             # insertFunctionTable()
             i = i + 1
             chk, fadt = AN(fdt)
-            if(fadt != ""):
+            if fadt != "":
                 fdt = fadt
             if chk:
                 signature.append(fdt)
                 cheker = insertFunctionTable(yid, fdt, highestScope)
-                if(cheker):
-                    print('success append in fyncrion ----------------')
-                print('appende from declaration -----------------')
+                if cheker:
+                    print("success append in fyncrion ----------------")
+                print("appende from declaration -----------------")
                 return True
             else:
                 return False
@@ -1965,7 +2262,7 @@ def PARAM():
 def func_def():
     global i, tokenType, currentClass, signature, accessMODvalue, isStatic, isAbstract, isFinal, createScope, highestScope, isFunc
     if tokenType[i] == "basic":
-        i = i+1
+        i = i + 1
         check, retdt = RDT()
         if check:
             if tokenType[i] == "def":
@@ -1982,8 +2279,15 @@ def func_def():
 
                                 signature.append("->")
                                 signature.append(retdt)
-                                chk = insertAttribute(funcId, signature, accessMODvalue,
-                                                      isStatic, isAbstract, isFinal, currentClass)
+                                chk = insertAttribute(
+                                    funcId,
+                                    signature,
+                                    accessMODvalue,
+                                    isStatic,
+                                    isAbstract,
+                                    isFinal,
+                                    currentClass,
+                                )
                                 signature = []
                                 i = i + 1
                                 if tokenType[i] == "opencurlybrace" and chk == True:
@@ -1993,8 +2297,7 @@ def func_def():
                                             value = destroyScope()
                                             isFunc = False
                                             i = i + 1
-                                            print("close curly truuu",
-                                                  tokenType[i])
+                                            print("close curly truuu", tokenType[i])
                                             return True
                                         else:
                                             errorMesssage(i)
@@ -2002,9 +2305,10 @@ def func_def():
                                     else:
                                         return False
                                 else:
-                                    if(chk == False):
+                                    if chk == False:
                                         errorList.append(
-                                            redeclarationError(currentClass))
+                                            redeclarationError(currentClass)
+                                        )
                                         return False
                                     errorMesssage(i)
                                     return False
@@ -2024,7 +2328,7 @@ def func_def():
                 return False
         else:
             if check == False:
-                print('type error')
+                print("type error")
             errorMesssage(i)
             return False
     else:
@@ -2036,8 +2340,8 @@ def construct_def():
     if tokenType[i] == "def":
         i = i + 1
         if tokenType[i] == "identifier":
-            if(tokenValue[i] != currentClass):
-                print('constructor syntax error')
+            if tokenValue[i] != currentClass:
+                print("constructor syntax error")
                 errorMesssage(i)
                 return False
             i = i + 1
@@ -2050,8 +2354,15 @@ def construct_def():
                 if PARAM():
                     if tokenType[i] == "closeroundbrace":
                         signature.append("->")
-                        chk = insertAttribute(currentClass, signature, accessMODvalue,
-                                              isStatic, isAbstract, isFinal, currentClass)
+                        chk = insertAttribute(
+                            currentClass,
+                            signature,
+                            accessMODvalue,
+                            isStatic,
+                            isAbstract,
+                            isFinal,
+                            currentClass,
+                        )
                         signature = []
                         i = i + 1
                         if tokenType[i] == "opencurlybrace" and chk == True:
@@ -2068,9 +2379,8 @@ def construct_def():
                             else:
                                 return False
                         else:
-                            if(chk == False):
-                                errorList.append(
-                                    redeclarationError(currentClass))
+                            if chk == False:
+                                errorList.append(redeclarationError(currentClass))
                                 return False
                             errorMesssage(i)
                             return False
@@ -2133,7 +2443,7 @@ def SST():
             return True
         else:
             return False
-    elif (tokenType[i] in ['this', 'super']):
+    elif tokenType[i] in ["this", "super"]:
         if TAssign_st():
             return True
         else:
@@ -2174,7 +2484,7 @@ def CB():
             return False
     elif tokenType[i] == "public":
         accessMODvalue = "public"
-        print('update to p :', accessMODvalue)
+        print("update to p :", accessMODvalue)
         i = i + 1
         if NAMS():
             print("static true")
@@ -2260,9 +2570,14 @@ def class_def():
                 i = i + 1
                 if INH():
                     notExist = insertMainTable(
-                        currentClass, mainTableType, mainTableTypeMOD, extendingClass, multipleInterface)
+                        currentClass,
+                        mainTableType,
+                        mainTableTypeMOD,
+                        extendingClass,
+                        multipleInterface,
+                    )
                     print(notExist, "the result")
-                    print('after insertion')
+                    print("after insertion")
                     if tokenType[i] == "opencurlybrace" and notExist:
                         i = i + 1
                         if CB():
@@ -2282,7 +2597,7 @@ def class_def():
                         else:
                             return False
                     else:
-                        if(notExist == False):
+                        if notExist == False:
                             theERROR = redeclarationError(currentClass)
                             errorList.append(theERROR)
                         errorMesssage(i)
@@ -2308,7 +2623,12 @@ def interface_def():
             i = i + 1
             if int_INH():
                 notExist = insertMainTable(
-                    currentClass, mainTableType, mainTableTypeMOD, extendingClass, multipleInterface)
+                    currentClass,
+                    mainTableType,
+                    mainTableTypeMOD,
+                    extendingClass,
+                    multipleInterface,
+                )
                 print(notExist, "the result")
                 if tokenType[i] == "opencurlybrace" and notExist:
                     i = i + 1
@@ -2328,7 +2648,7 @@ def interface_def():
                     else:
                         return False
                 else:
-                    if(notExist == False):
+                    if notExist == False:
                         theERROR = redeclarationError(currentClass)
                         errorList.append(theERROR)
                     errorMesssage(i)
@@ -2477,7 +2797,12 @@ def abs_class_def():
                 i = i + 1
                 if INH():
                     notExist, extendsClass = insertMainTable(
-                        currentClass, mainTableType, mainTableTypeMOD, extendingClass, multipleInterface)
+                        currentClass,
+                        mainTableType,
+                        mainTableTypeMOD,
+                        extendingClass,
+                        multipleInterface,
+                    )
                     print(notExist, "the result")
                     if tokenType[i] == "opencurlybrace" and notExist:
                         i = i + 1
@@ -2498,14 +2823,12 @@ def abs_class_def():
                         else:
                             return False
                     else:
-                        if(notExist == False):
-                            if(extendsClass != ""):
-                                theERROR = redeclarationError(
-                                    currentClass)
+                        if notExist == False:
+                            if extendsClass != "":
+                                theERROR = redeclarationError(currentClass)
                                 errorList.append(theERROR)
                             else:
-                                theERROR = redeclarationError(
-                                    currentClass)
+                                theERROR = redeclarationError(currentClass)
                                 errorList.append(theERROR)
                         errorMesssage(i)
                         return False
@@ -2573,28 +2896,36 @@ def syntaxAnalyzer():
 
 result = syntaxAnalyzer()
 
-print('                           -------------BACK tracking Print Statement----------------------------------')
-print('*****************************************************************************')
-if(result and len(errorList) > 0):
-    print('parsed unconditionaly!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1')
+print(
+    "                           -------------BACK tracking Print Statement----------------------------------"
+)
+print("*****************************************************************************")
+if result:
+    print("parsed unconditionaly!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
 
-if (result and len(errorList) == 0):
+if result and len(errorList) == 0:
     print("                         >>>>>>>>>>>Parsed Successfully<<<<<<<<<<<<<")
-elif(len(errorList) != 0):
+elif len(errorList) != 0:
     print("ERROR <>>>>>>>>>>>", errorList[0])
 else:
     print("error in line :", calclateLineNo(i), allLines[i])
-print('                             -------------------ERROR LIST------------------------------------------------')
+print(
+    "                             -------------------ERROR LIST------------------------------------------------"
+)
 print(errorList)
-print('                              -------------------MAIN TABLE------------------------------------------------')
+print(
+    "                              -------------------MAIN TABLE------------------------------------------------"
+)
 print("TOTAL OBJ REF <>>>>>>>> :", len(mainTable_))
 for i in mainTable_:
     print("-----------------------CLASS NAME:", i.getName())
     print(vars(i), "the valus")
     for j in i.attrTable:
-        print('attributes---')
+        print("attributes---")
         print(vars(j), "the valus")
-print('                            -------------------function TABLE------------------------------------------------')
+print(
+    "                            -------------------function TABLE------------------------------------------------"
+)
 for i in functionTable_:
     print(vars(i), "the valus")
-print('*****************************************************************************')
+print("*****************************************************************************")

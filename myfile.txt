@@ -1,7 +1,11 @@
 class A {
-    int b ; 
+    int b = 212121 ; 
+    int a=0;
+    
     def A(int e){
-        float ffvf;
+        float ffvf=1111;
+        int A[];
+        A[a+b] = 59.5;
     }
 
     public static  basic void def myFunc (){
@@ -20,11 +24,12 @@ class B extends A {
 
 class main{
     A a = new A(5);
+    int res ;
     public static def main (){
         A a = new A(5);
         B b = new B(4);
-        int res ;
-        res = a.b * b.c ;
+        
+        res = a.b * b.c + a.b ;
     }
 }
 
