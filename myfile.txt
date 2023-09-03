@@ -1,3 +1,24 @@
+
+final abstract class Y {}
+class A {
+
+}
+
+class B extends A { }
+interface C {}
+interface D extends C {}
+
+final class E {}
+
+class X extends E implements C , D {}
+
+abstract class ED extends B {}
+
+
+
+
+
+#
 class A {
     int b = 212121 ; 
     int a=0;
@@ -17,8 +38,8 @@ class A {
 class B extends A {
     int c;
     def B(int r){
-        super(78) ;
         this.c = r;
+        super(78) ;
     }
 }
 
@@ -32,4 +53,4 @@ class main{
         res = a.b * b.c + a.b ;
     }
 }
-
+#

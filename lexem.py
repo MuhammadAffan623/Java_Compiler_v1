@@ -317,7 +317,7 @@ for line in f:
             if (line[len(line) - 1] != "\n") & (len(tempp) > 0):
                 checker(tempp, ln, False)
                 tempp = ""
-            break
+            break  
 print(tokenlist[0])
 k = open("result.txt", "w")
 k.write(
@@ -331,7 +331,7 @@ k.write(
 k.close()
 k = open("result.txt", "a")
 for i in range(1, len(tokenlist)):
-    print(tokenlist[i])
+    # print(tokenlist[i])
     k.write(
         str(tokenlist[i][0])
         + ", "

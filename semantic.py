@@ -1,4 +1,4 @@
-# from LexicalNew import tokenlist
+from finalLex import tokenlist
 from seFunction import (
     scopeError,
     ptypeError,
@@ -31,7 +31,6 @@ error = ""
 errorList = []
 currentFunction = 0
 currentScope = 0
-# print(tokenlist)
 tokenType = []
 tokenValue = []
 i = 0
@@ -47,14 +46,14 @@ isFinal = False
 isAbstract = False
 signature = []
 isFunc = False
-# for line in tokenlist:
-#     tokenType.append(line[0])
-#     tokenValue.append(line[1])
+for line in tokenlist:
+    tokenType.append(line[0])
+    tokenValue.append(line[1])
 
-# tokenType.append("EOF")
-# tokenValue.append("EOF")
+tokenType.append("EOF")
+tokenValue.append("EOF")
 
-# print(tokenType)
+print(tokenType)
 
 
 def clearAccesandNonAccess():
@@ -89,24 +88,24 @@ def errorMesssage(itr):
 
 
 # --------------------
-resultFile = open("result.txt")
+# resultFile = open("result.txt")
 
-a = resultFile.read()
-allLines = a.split("\n")
-tokenType = []
-tokenLine = []
+# a = resultFile.read()
+# allLines = a.split("\n")
+# tokenType = []
+# tokenLine = []
 
-for line in allLines:
-    splitted = line.split(",")
-    if len(splitted) > 2:
-        tokenType.append(splitted[0])
-        tokenValue.append(splitted[1])
+# for line in allLines:
+#     splitted = line.split(",")
+#     if len(splitted) > 2:
+#         tokenType.append(splitted[0])
+#         tokenValue.append(splitted[1])
 
-tokenType.append("EOF")
-tokenValue.append("EOF")
-print("<<<<<<<<<<<<<<<<<<<<<<<<<EXTRAS START>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-print(tokenType)
-print("<<<<<<<<<<<<<<<<<<<<<<<<<EXTRAS END>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+# tokenType.append("EOF")
+# tokenValue.append("EOF")
+# print("<<<<<<<<<<<<<<<<<<<<<<<<<EXTRAS START>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+# print(tokenType)
+# print("<<<<<<<<<<<<<<<<<<<<<<<<<EXTRAS END>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
 
 def MVA():
@@ -2865,7 +2864,9 @@ def CB():
 
 def class_def():
     global i, tokenType, extendingClass, multipleInterface, mainTableTypeMOD, mainTableType, currentClass
-    if NAMF():
+    if tokenType[i] == "final":
+        mainTableTypeMOD = "final"
+        i = i + 1
         if tokenType[i] == "class":
             mainTableType = "class"
             i = i + 1
@@ -2923,6 +2924,60 @@ def class_def():
                 errorMesssage(i)
                 return False
         else:
+            return False
+    elif tokenType[i] == "class":
+        mainTableType = "class"
+        i = i + 1
+        if tokenType[i] == "identifier":
+            currentClass = tokenValue[i]
+            i = i + 1
+            if INH():
+                notExist = insertMainTable(
+                    currentClass,
+                    mainTableType,
+                    mainTableTypeMOD,
+                    extendingClass,
+                    multipleInterface,
+                )
+                print(notExist, "the result")
+                print("after insertion")
+                if tokenType[i] == "opencurlybrace" and notExist:
+                    i = i + 1
+                    if CB():
+                        print("CB TRUE")
+                        if tokenType[i] == "closecurlybrace":
+                            currentClass = ""
+                            extendingClass = ""
+                            multipleInterface = []
+                            mainTableTypeMOD = ""
+                            mainTableType = ""
+                            print("class curly")
+                            i = i + 1
+                            return True
+                        else:
+                            frameinfo = getframeinfo(currentframe())
+                            print(
+                                "ERROR MESSAGE LINE NUMBER IN SMEANTIC:",
+                                frameinfo.lineno,
+                            )
+                            errorMesssage(i)
+                            return False
+                    else:
+                        return False
+                else:
+                    if notExist == False:
+                        theERROR = redeclarationError(currentClass)
+                        errorList.append(theERROR)
+                    frameinfo = getframeinfo(currentframe())
+                    print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
+                    errorMesssage(i)
+                    return False
+            else:
+                return False
+        else:
+            frameinfo = getframeinfo(currentframe())
+            print("ERROR MESSAGE LINE NUMBER IN SMEANTIC:", frameinfo.lineno)
+            errorMesssage(i)
             return False
     else:
         return False
